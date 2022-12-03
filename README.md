@@ -48,26 +48,44 @@ Fedora:
 ``` console
 sudo dnf install python3-pip python3-devel hidapi
 ```
+
+openSUSE Leap & Tumbleweed:
+``` console
+sudo zypper install python3-pip libhidapi-libusb0 libxcb-xinerama0 python-devel python3-devel python310 python310-devel gcc gcc-c++ kernel-devel
+```
+
 If you're using GNOME shell, you might need to manually install an extension that adds [KStatusNotifierItem/AppIndicator Support](https://extensions.gnome.org/extension/615/appindicator-support/) to make the tray icon show up.
 
 To use streamdeck_ui without root permissions, you have to give your user full access to the device.
 
-Add the udev rules using the nano text editor:
+List USB Devices Details using lsusb Command
+``` console
+lsusb
+```
+Then search for your Elgato Stream Deck like this one:
+![lsusb-elgato_stream_deck](https://user-images.githubusercontent.com/79079633/205458785-6e1c092c-cd12-48fb-8637-0e3dfe0f6f87.jpg)
+
+Now we have all the information to add a specific udev rule using for example the nano text editor:
 ``` console
 sudo nano /etc/udev/rules.d/70-streamdeck.rules
 ```
 Paste the following line and write the file:
 ``` console 
-SUBSYSTEM=="usb", ATTRS{idVendor}=="0fd9", TAG+="uaccess"
+SUBSYSTEM=="usb", ATTRS{idVendor}=="0fd9", ATTRS{idProduct}=="0080", TAG+="uaccess"
 ```
 Make the new rule take effect:
 ``` console
 sudo udevadm trigger
 ```
+or
+
+``` console
+sudo udevadm control --reload-rules
+```
 
 Installing the application itself is done via pip:
 ``` console
-pip3 install streamdeck-ui --user
+pip3 install wheel pillow streamdeck-ui --user
 ```
 Make sure to include `$HOME/.local/bin` to your PATH.  
 If you haven't already, add
@@ -110,7 +128,6 @@ Find the window with a title starting with `Meet - ` and bring it to focus. This
 xdotool search --name '^Meet - .+$' windowactivate 
 ```
 > The meeting tab must be active one if you have multiple tabs open, since the window title is set by the currently active tab.
-
 Find the window with a title starting with `Meet - ` and then send `ctrl+d` to it. This has the effect of toggling the mute button in Google Meet.
 ``` console
 xdotool search --name '^Meet - .+$' windowactivate --sync key ctrl+d
@@ -138,7 +155,6 @@ You can also specify a KeyCode in hex format, for example, `0x74` is the KeyCode
 > 
 > Use `delay <n>` to add a delay, where `<n>` is the number (float or integer) of seconds to delay. If `<n>` is not specified, 0.5 second default is used. If `<n>` fails to parse as a valid number, it will result in no delay.
 > 
-
 #### Examples
 - `F11` - Press F11. If you have focus on a browser, this will toggle full screen.
 - `alt+F4` - Closes the current window.
